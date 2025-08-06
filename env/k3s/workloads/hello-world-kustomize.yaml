@@ -2,12 +2,12 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: hello-world-kustomize
-  namespace: argocd # <-- NEVER CHANGE
+  namespace: argocd  # <-- NEVER CHANGE
 spec:
   project: default
   source:
-    repoURL: https://github.com/arslankhanali/pattern-app-of-apps
-    path: apps/hello-world-kustomize/overlays/k3s  # <-- CHANGE THIS
+    repoURL: https://github.com/arslankhanali/GitOps-App-of-Apps-Pattern
+    path: apps/hello-world-kustomize/overlays/k3s  # <-- CHANGE THIS as needed
     targetRevision: HEAD
   destination:
     server: https://kubernetes.default.svc
@@ -16,6 +16,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
-  syncOptions:
+    syncOptions:
       - CreateNamespace=true
-    

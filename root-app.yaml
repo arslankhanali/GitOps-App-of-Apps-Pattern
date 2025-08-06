@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/arslankhanali/pattern-app-of-apps
+    repoURL: https://github.com/arslankhanali/GitOps-App-of-Apps-Pattern
     targetRevision: HEAD
     path: env/k3s # <-- Updated path
   destination:
@@ -16,3 +16,6 @@ spec:
     automated:
       prune: true
       selfHeal: true
+
+
+      
