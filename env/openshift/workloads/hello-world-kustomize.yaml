@@ -1,0 +1,21 @@
+# /argocd/applications/argocd.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-world-kustomize
+  namespace: hello-world-kustomize
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/arslankhanali/pattern-app-of-apps
+    path: applications/hello-world-kustomize/overlays/openshift  # <-- CHANGE THIS
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hello-world-kustomize
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

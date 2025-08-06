@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubernetes-dashboard
+  namespace: argocd # <-- NEVER CHANGE
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kubernetes-dashboard
+  source:
+    repoURL: https://github.com/arslankhanali/pattern-app-of-apps
+    path: apps/kubernetes-dashboard/overlays/k3s  # <-- CHANGE THIS
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

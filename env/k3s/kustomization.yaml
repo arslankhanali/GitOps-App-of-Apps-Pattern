@@ -1,0 +1,4 @@
+resources:
+  - platform/argocd.yaml
+  - platform/kubernetes-dashboard.yaml
+  - workloads/hello-world-kustomize.yaml

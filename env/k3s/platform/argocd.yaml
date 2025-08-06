@@ -1,0 +1,19 @@
+# /argocd/applications/argocd.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd # <-- NEVER CHANGE
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/arslankhanali/pattern-app-of-apps
+    path: apps/argocd/overlays/k3s # <-- CHANGE THIS
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

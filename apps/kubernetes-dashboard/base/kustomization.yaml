@@ -1,0 +1,15 @@
+# kubernetes-dashboard/base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Add the official Kubernetes Dashboard chart as a remote resource
+helmCharts:
+- name: kubernetes-dashboard
+  repo: https://kubernetes.github.io/dashboard/
+  version: v7.13.0 # <-- Use the version you want
+  releaseName: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+  valuesFile: values.yaml # <-- Point to your values file
+
+resources:
+  - serviceaccount.yaml

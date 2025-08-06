@@ -1,0 +1,3 @@
+resources:
+  - platform/argocd.yaml
+  - workloads/hello-world-kustomize.yaml
