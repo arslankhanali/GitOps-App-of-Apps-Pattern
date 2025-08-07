@@ -1,15 +1,32 @@
-# Mastering Kubernetes Deployments with tGitOps
+# Mastering Kubernetes Deployments with GitOps
 
 Managing multiple Kubernetes clusters and applications can get complex fast. **GitOps** helps tame this complexity—and the **App of Apps pattern** takes it to the next level with declarative, scalable, and automated infrastructure management.
 
 ---
-
-## Why Use the App of Apps Pattern?
+## Why Read this blog?
 
 To live like this
 ![relax](https://images.unsplash.com/photo-1496046744122-2328018d60b6?q=80&w=2374&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
 
-Also, The App of Apps is a GitOps design where a **single root ArgoCD application** manages multiple child applications, each representing a platform component or workload. It offers:
+---
+## What is GitOps?
+
+GitOps is a **DevOps operating model** where Git is the **single source of truth** for declarative infrastructure and applications. Tools like Argo CD sync the state of your Kubernetes clusters to match Git, automatically and continuously.
+
+## WHAT is the "App of Apps Pattern"?
+
+The *App of Apps* pattern uses a single Argo CD Application to manage many other Argo CD Applications. It enables **modular**, **scalable**, and **environment-specific** deployment structures.
+
+Imagine one app (`root-app.yaml`) that deploys:
+
+- Platform apps like Ingress, Cert-Manager & Operators
+- Workload apps like Podinfo, Guestbook, etc.
+
+Each app lives in its own folder, can use Kustomize/Helm, and is deployed declaratively from Git.
+
+## WHY use the "App of Apps Pattern"?
+
+It offers:
 
 - **Declarative control** :  Everything is defined in Git.
 - **Zero-touch provisioning** :  GitOps installs and configures your entire stack.
@@ -20,22 +37,22 @@ Also, The App of Apps is a GitOps design where a **single root ArgoCD applicatio
 - **Self Healing** :  Accidently deleted something ? Let GitOps fix it for you.
 
 ---
-
-## Explain whay is Gitops
-## Explain what is app of app patterm and how it works
-
----
-# Let's Deploy everything in seconds now
+# Let's Deploy everything (in seconds)
+Start the timer  
 ## Prerequisites to Deploy
 
 - A Kubernetes cluster: This demo is tested on `K3s` but should work on any cluster
-- CLI tools :  `kubectl`
-- Fork git repo from :  [`arslankhanali/pattern-app-of-apps`](https://github.com/arslankhanali/pattern-app-of-apps)
-- 
+- CLI tools :  `kubectl`, `helm`
+- Forked git repo :
+  ```sh
+  git clone https://github.com/arslankhanali/GitOps-App-of-Apps-Pattern.git`
+  ```
+Now! start the timer
 ## 1. Install argocd on your Kubernetes cluster
 
 ```bash
-export KUBECONFIG=~/k3s-config  # or OpenShift config
+export KUBECONFIG=~/k3s-config  # <-- To access Kubernetes cluster
+# kubectl get all -A
 
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
@@ -50,7 +67,7 @@ Apply environment-specific ingress for argocd :
 kubectl apply -f ingress.yaml
 
 # OpenShift
-kubectl apply -f apps/argocd/overlays/openshift/route.yaml
+kubectl apply -f route.yaml
 ```
 
 ---
@@ -61,7 +78,7 @@ Make sure your `/etc/hosts` file has following entries.
 <K3s-cluster-IP> k3s.node1 argocd.node1 test.node1 hello.node1
 ```
 ## 3. Login to Argo dashboard
-You will see apps getting deployed here.
+To see apps getting deployed.
 - Argocd [argocd.node1](https://argocd.node1)
 ```bash
 # Get Login password for admin user
@@ -84,10 +101,12 @@ kubectl -n kubernetes-dashboard create token admin-user
 - Guestbook [test.node1](http://test.node1)
 - Podinfo [hello.node1](http://hello.node1)
  
-# ArgoCD will : 
-1. Sync the `env/{k3s}/` directory.
-2. Create child applications in {platform & workloads} folders.
-3. Deploy all components declaratively.
+You can now stop the Timer. It tooks me < 1min to deploy everything.
+
+# ArgoCD has : 
+1. Synced the `env/{k3s}/` directory.
+2. Created child applications in {platform & workloads} folders.
+3. Deployed all components declaratively.
 
 This pattern allows full cluster rebuilds and updates via Git commits alone.
 ![alt text](/argocd-app-of-apps/argocd.png)
