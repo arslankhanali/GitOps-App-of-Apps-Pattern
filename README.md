@@ -59,17 +59,17 @@ export KUBECONFIG=~/k3s-config  # <-- To access Kubernetes cluster
 helm repo add argo https://argoproj.github.io/argo-helm
 helm repo update
 kubectl create namespace argocd
-helm install argocd argo/argo-cd -n argocd -f values.yaml
+helm install argocd argo/argo-cd -n argocd -f argocd/values.yaml
 ```
 
 Apply environment-specific ingress for argocd : 
 
 ```bash
 # K3s
-kubectl apply -f ingress.yaml
+kubectl apply -f argocd/ingress.yaml
 
 # OpenShift
-kubectl apply -f route.yaml
+kubectl apply -f argocd/route.yaml
 ```
 
 ---
@@ -98,7 +98,7 @@ kubectl apply -f root-app.yaml
 - Kubernetes Dashboard [k3s.node1](https://k3s.node1)
 ```
 # Get Bearer Token
-kubectl -n kubernetes-dashboard create token admin-user
+kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath="{.data.token}" | base64 -d
 ```
 - Guestbook [test.node1](http://test.node1)
 - Podinfo [hello.node1](http://hello.node1)
@@ -115,8 +115,52 @@ This pattern allows full cluster rebuilds and updates via Git commits alone.
 
 ---
 
+### Steps to deploy new app
+1. Add application to the `apps/` folder.
+2. Test the application
+```sh
+kustomize build <kustomization-dir> | kubectl apply -f -
+# or
+kubectl apply -k k8s/overlays/dev
+
+```
+3. Create argocd-application in `env/{k3s}` folder
+<details>
+<summary>See example: argoproj Application'</summary>
+
+``` yml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: <app-name>      # <-- CHANGE THIS as needed
+  namespace: argocd     # <-- NEVER CHANGE
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:arslankhanali/homelab-kubernetes.git
+    path: apps/<app-name>/overlays/k3s  # <-- CHANGE THIS as needed
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: <app-name> # <-- CHANGE THIS as needed
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true        # If namespace named above should be created
+```
+</details>    
+
+4. Reference file you created in step3 in `/env/k3s/kustomization.yaml`
+5. Push to git `git add . && git commit -m "new app" && git push`
+6. Argo should sync automatically
+
+---
 ## Delete All
 ```sh
+kubectl delete -f root-app.yaml
+
 # delete all argocd apps
 for app in $(kubectl get applications -n argocd -o jsonpath='{.items[*].metadata.name}'); do
   kubectl patch application "$app" -n argocd -p '{"metadata":{"finalizers":[]}}' --type=merge
@@ -126,6 +170,7 @@ done
 kubectl delete ns argocd
 kubectl delete ns kubernetes-dashboard
 kubectl delete ns podinfo
+kubectl delete ns guestbook
 ```
 ---
 
