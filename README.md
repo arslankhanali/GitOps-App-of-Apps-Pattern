@@ -1,3 +1,5 @@
+[Blog](https://arslankhanali.github.io/my-blog/posts/argocd-app-of-apps/)
+
 # Mastering Kubernetes Deployments with GitOps
 
 Managing multiple Kubernetes clusters and applications can get complex fast. **GitOps** helps tame this complexity—and the **App of Apps pattern** takes it to the next level with declarative, scalable, and automated infrastructure management.
