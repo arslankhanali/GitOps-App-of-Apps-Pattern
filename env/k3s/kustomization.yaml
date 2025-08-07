@@ -1,3 +1,4 @@
 resources:
   - platform/kubernetes-dashboard.yaml
   - workloads/podinfo.yaml
+  - workloads/guestbook.yaml

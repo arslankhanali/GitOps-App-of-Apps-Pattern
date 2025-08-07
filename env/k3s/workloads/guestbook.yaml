@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guestbook                     # <-- CHANGE THIS as needed
+  namespace: argocd                 # <-- NEVER CHANGE
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/arslankhanali/GitOps-App-of-Apps-Pattern
+    path: apps/guestbook/overlays/k3s  # <-- CHANGE THIS as needed
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: guestbook               # <-- CHANGE THIS as needed
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
