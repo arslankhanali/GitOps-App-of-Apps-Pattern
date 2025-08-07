@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: hello-world
-  namespace: argocd  # <-- NEVER CHANGE
+  name: podinfo                     # <-- CHANGE THIS as needed
+  namespace: argocd                 # <-- NEVER CHANGE
 spec:
   project: default
   source:
     repoURL: https://github.com/arslankhanali/GitOps-App-of-Apps-Pattern
-    path: apps/hello-world/overlays/k3s  # <-- CHANGE THIS as needed
+    path: apps/podinfo/overlays/k3s  # <-- CHANGE THIS as needed
     targetRevision: HEAD
   destination:
     server: https://kubernetes.default.svc
-    namespace: hello-world
+    namespace: podinfo               # <-- CHANGE THIS as needed
   syncPolicy:
     automated:
       prune: true

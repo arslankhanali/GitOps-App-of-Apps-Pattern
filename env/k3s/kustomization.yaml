@@ -1,4 +1,3 @@
 resources:
-  - platform/argocd.yaml
   - platform/kubernetes-dashboard.yaml
-  - workloads/hello-world.yaml
+  - workloads/podinfo.yaml

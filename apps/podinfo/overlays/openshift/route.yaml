@@ -1,0 +1,16 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: podinfo-route
+spec:
+  to:
+    kind: Service
+    name: podinfo
+  port:
+    targetPort: http
+  # You can uncomment and add a host if you have a specific DNS record
+  # host: podinfo.apps.mycluster.com
+  #
+  # Uncomment the following to enable TLS
+  # tls:
+  #   termination: edge

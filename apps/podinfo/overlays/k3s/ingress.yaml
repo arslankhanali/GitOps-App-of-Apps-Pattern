@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: the-ingress
+  name: podinfo
 spec:
   ingressClassName: traefik
   rules:
@@ -12,6 +12,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: the-service
+                name: podinfo
                 port:
-                  number: 8080
+                  number: 9898
