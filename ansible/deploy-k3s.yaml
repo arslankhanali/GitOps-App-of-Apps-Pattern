@@ -1,0 +1,83 @@
+---
+- name: Deploy K3s on Fedora VM
+  hosts: all
+  vars:
+    k3s_install_script_url: "https://get.k3s.io"
+
+  tasks:
+    - name: Ensure firewalld is running
+      ansible.builtin.service:
+        name: firewalld
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: Add K3s API server
+      ansible.posix.firewalld:
+        port: 6443/tcp
+        permanent: yes
+        state: enabled
+      become: yes
+      notify: Reload firewalld
+
+    - name: Add K3s Pod network
+      ansible.posix.firewalld:
+        zone: trusted
+        source: 10.42.0.0/16
+        permanent: yes
+        state: enabled
+      become: yes
+      notify: Reload firewalld
+
+    - name: Add K3s Service network
+      ansible.posix.firewalld:
+        zone: trusted
+        source: 10.43.0.0/16
+        permanent: yes
+        state: enabled
+      become: yes
+      notify: Reload firewalld
+
+    - name: Create kubeconfig group
+      ansible.builtin.group:
+        name: kubeconfig
+        state: present
+      become: yes
+
+    - name: Add user to kubeconfig group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: kubeconfig
+        append: yes
+      become: yes
+
+    - name: Install K3s with custom kubeconfig permissions
+      ansible.builtin.shell: |
+        curl -sfL {{ k3s_install_script_url }} | INSTALL_K3S_EXEC="--write-kubeconfig-mode 640 --write-kubeconfig-group kubeconfig" sh -
+      args:
+        creates: /usr/local/bin/k3s
+      become: true
+
+    - name: Create .kube directory for the user
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.kube"
+        state: directory
+        mode: '0755'
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    - name: Symlink K3s kubeconfig to ~/.kube/config
+      ansible.builtin.file:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: "{{ ansible_user_dir }}/.kube/config"
+        state: link
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      become: true
+
+  handlers:
+    - name: Reload firewalld
+      ansible.builtin.service:
+        name: firewalld
+        state: reloaded
+      become: yes

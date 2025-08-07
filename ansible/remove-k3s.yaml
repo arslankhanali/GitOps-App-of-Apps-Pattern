@@ -1,0 +1,63 @@
+---
+- name: Uninstall K3s from Fedora VM
+  hosts: all
+  become: yes
+  vars:
+    uninstall_script_path: "/usr/local/bin/k3s-uninstall.sh"
+
+  tasks:
+    - name: Execute K3s uninstall script
+      ansible.builtin.shell: "{{ uninstall_script_path }}"
+      args:
+        # Check if the uninstall script exists before attempting to run it.
+        creates: "{{ uninstall_script_path }}"
+
+    - name: Remove K3s API server port from firewalld
+      ansible.posix.firewalld:
+        port: 6443/tcp
+        permanent: yes
+        state: disabled
+      notify: Reload firewalld
+
+    - name: Remove K3s Pod network from trusted zone
+      ansible.posix.firewalld:
+        zone: trusted
+        source: 10.42.0.0/16
+        permanent: yes
+        state: disabled
+      notify: Reload firewalld
+
+    - name: Remove K3s Service network from trusted zone
+      ansible.posix.firewalld:
+        zone: trusted
+        source: 10.43.0.0/16
+        permanent: yes
+        state: disabled
+      notify: Reload firewalld
+
+    - name: Remove symlink to kubeconfig
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.kube/config"
+        state: absent
+
+    - name: Remove .kube directory
+      ansible.builtin.file:
+        path: "{{ ansible_user_dir }}/.kube"
+        state: absent
+
+    - name: Remove user from kubeconfig group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: kubeconfig
+        append: no # This removes the user from the specified group
+
+    - name: Remove kubeconfig group
+      ansible.builtin.group:
+        name: kubeconfig
+        state: absent
+
+  handlers:
+    - name: Reload firewalld
+      ansible.builtin.service:
+        name: firewalld
+        state: reloaded
